@@ -8,4 +8,6 @@
 ### Smartcontract helper
 - [Truffle](https://www.trufflesuite.com/truffle)
 
-
+## TODO
+### Dockerfile
+- [ ] Create a dockerfile that generate the blockchain
