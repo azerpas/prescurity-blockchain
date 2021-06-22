@@ -7,7 +7,7 @@ contract Prescurity {
     struct Admin {
         uint id;
         address admin_address;
-        bool exists;
+        bool isValue;
     }
 
     struct Patient {
@@ -16,6 +16,7 @@ contract Prescurity {
         uint numero_secu;
         address patient_address;
         uint[] prescriptions_ids;
+        bool isValue;
     }
 
     struct Doctor {
@@ -23,12 +24,14 @@ contract Prescurity {
         string speciality;
         string name;
         address doctor_address;
+        bool isValue;
     }
 
     struct Pharmacy {
         uint id;
         string name;
         address pharmacy_address;
+        bool isValue;
     }
     
     struct Prescription {
@@ -41,6 +44,7 @@ contract Prescurity {
         string frequency;
         string start_timestamp;
         string end_timestamp;
+        bool isValue;
     }
 
     event Consultation(Patient patient, Doctor doctor, uint amount); 
@@ -94,5 +98,15 @@ contract Prescurity {
         } else {
             revert("Sorry, this function is reserved to the admin");
         }
+    }
+
+    function add_doctor(address addr, uint id, string calldata name, string calldata speciality) external admin_only {
+        require(doctor_address_map[addr].isValue, "This address is already defined as a doctor");
+        doctor_address_map[addr].id = id;
+        doctor_address_map[addr].speciality = speciality;
+        doctor_address_map[addr].name = name;
+        doctor_address_map[addr].doctor_address = addr;
+        doctor_address_map[addr].isValue = true;
+        doctor_authentification[addr] = authentification.doctor;
     }
 }
