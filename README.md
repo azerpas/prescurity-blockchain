@@ -11,3 +11,7 @@
 ## TODO
 ### Dockerfile
 - [ ] Create a dockerfile that generate the blockchain
+
+## How to use
+
+1. [Install Geth](https://geth.ethereum.org/docs/install-and-build/installing-geth#install-from-a-package-manager)

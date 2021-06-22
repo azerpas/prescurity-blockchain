@@ -1,0 +1,23 @@
+{
+  "name": "blockchain",
+  "version": "1.0.0",
+  "description": "## Stack ### Operate Ethereum nodes - [Go-ethereum](https://geth.ethereum.org/) ### Blockchain emulator - [Ganache](https://www.trufflesuite.com/ganache) ### Smartcontract helper - [Truffle](https://www.trufflesuite.com/truffle)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/azerpas/prescurity-blockchain.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/azerpas/prescurity-blockchain/issues"
+  },
+  "homepage": "https://github.com/azerpas/prescurity-blockchain#readme",
+  "devDependencies": {
+    "truffle": "^5.1.65"
+  }
+}
