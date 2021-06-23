@@ -9,12 +9,6 @@ contract Prescurity {
         uint id;
         address admin_address;
         bool isValue;
-     }
-
-    struct Admin {
-        uint id;
-        address admin_address;
-        bool isValue;
     }
 
     struct Patient {
@@ -108,7 +102,20 @@ contract Prescurity {
         } else {
             revert("Sorry, this function is reserved to the admin");
         }
-     }
+    }
+
+    function get_user_type() view public returns (string memory) {
+        if (doctor_authentification[msg.sender] == authentification.doctor) {
+            return "doctor";
+        }
+        if (pharmacy_authentification[msg.sender] == authentification.pharmacy) {
+            return "pharmacy";
+        }
+        if (patient_authentification[msg.sender] == authentification.patient) {
+            return "patient";
+        }
+        return "";
+    }
 
     function add_doctor(address addr, uint id, string calldata name, string calldata speciality) external admin_only {
         require(!doctor_id_map[id].isValue, "This address is already defined as a doctor");
@@ -118,8 +125,7 @@ contract Prescurity {
         doctor_id_map[id].doctor_address = addr;
         doctor_id_map[id].isValue = true;
         doctor_authentification[addr] = authentification.doctor;
-     }
- 
+    }
 
     function add_pharmacy(address addr, uint id, string calldata name) external admin_only {
         require(!pharmacy_id_map[id].isValue, "This address is already defined as a pharmacy");
@@ -128,7 +134,7 @@ contract Prescurity {
         pharmacy_id_map[id].pharmacy_address = addr;
         pharmacy_id_map[id].isValue = true;
         pharmacy_authentification[addr] = authentification.pharmacy;
-     }
+    }
 
     function add_admin(address addr, uint id) external admin_only {
         require(!admin_id_map[id].isValue, "This address is already defined as a admin");
@@ -145,4 +151,5 @@ contract Prescurity {
     }
     
     event Consultation(Patient patient, Doctor doctor, uint amount);
+    event RetrieveMedicaments(Patient patient, Pharmacy pharmacy, Prescription prescription);
 }
