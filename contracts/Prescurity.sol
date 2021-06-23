@@ -11,6 +11,12 @@ contract Prescurity {
         bool isValue;
      }
 
+    struct Admin {
+        uint id;
+        address admin_address;
+        bool isValue;
+    }
+
     struct Patient {
         uint numero_secu;
         address patient_address;
@@ -87,6 +93,7 @@ contract Prescurity {
             revert("Sorry, this function is reserved to the doctor");
         }
     }
+    
     modifier pharmacy_only(){
         if (pharmacy_authentification[msg.sender] == authentification.pharmacy) {
             _;
@@ -94,6 +101,7 @@ contract Prescurity {
             revert("Sorry, this function is reserved to the pharmacy");
         }
     }
+    
     modifier admin_only(){
         if (admin_authentification[msg.sender] == authentification.admin) {
             _;
