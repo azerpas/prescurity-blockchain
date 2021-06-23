@@ -98,11 +98,11 @@ contract Prescurity {
         if (admin_authentification[msg.sender] == authentification.admin) {
             _;
         } else {
-             revert("Sorry, this function is reserved to the admin");
-         }
+            revert("Sorry, this function is reserved to the admin");
+        }
      }
 
-     function add_doctor(address addr, uint id, string calldata name, string calldata speciality) external admin_only {
+    function add_doctor(address addr, uint id, string calldata name, string calldata speciality) external admin_only {
         require(doctor_id_map[id].isValue, "This address is already defined as a doctor");
         doctor_id_map[id].id = id;
         doctor_id_map[id].speciality = speciality;
@@ -114,7 +114,7 @@ contract Prescurity {
  
 
     function add_pharmacy(address addr, uint id, string calldata name) external admin_only {
-        require(pharmacy_id_map[id].isValue, "This address is already defined as a pharmacie");
+        require(pharmacy_id_map[id].isValue, "This address is already defined as a pharmacy");
         pharmacy_id_map[id].id = id;
         pharmacy_id_map[id].name = name;
         pharmacy_id_map[id].pharmacy_address = addr;
@@ -123,30 +123,20 @@ contract Prescurity {
      }
 
     function add_admin(address addr, uint id)external admin_only{
-        require(!doctor_id_map[id].isValue,"this addres is already defined as a doctor");
-        require(!pharmacy_id_map[id].isValue,"this addres is already defined as a pharmacy");
-        require(!patient_num_secu_map[id].isValue,"this addres is already defined as a patient");
+        require(!doctor_id_map[id].isValue, "This addres is already defined as a doctor");
+        require(!pharmacy_id_map[id].isValue,"This addres is already defined as a pharmacy");
+        require(!patient_num_secu_map[id].isValue, "this addres is already defined as a patient");
         admin_id_map[id].id=id;
         admin_id_map[id].isValue=true;
         admin_authentification[addr]=authentification.admin;
     }
 
     function add_patient(uint numero_secu,address addr)external{
-    require(!patient_num_secu_map[numero_secu].isValue,"this address is already defined as a patient");
-    patient_num_secu_map[numero_secu].numero_secu=numero_secu;
-    patient_num_secu_map[numero_secu].isValue=true;
-    patient_authentification[addr]=authentification.patient;
-
+        require(!patient_num_secu_map[numero_secu].isValue, "This address is already defined as a patient");
+        patient_num_secu_map[numero_secu].numero_secu=numero_secu;
+        patient_num_secu_map[numero_secu].isValue=true;
+        patient_authentification[addr]=authentification.patient;
     }
-
-
-
-     event Consultation(Patient patient, Doctor doctor, uint amount);
-
-
-
-
-
-
-
+    
+    event Consultation(Patient patient, Doctor doctor, uint amount);
 }
