@@ -19,5 +19,8 @@
   "homepage": "https://github.com/azerpas/prescurity-blockchain#readme",
   "devDependencies": {
     "truffle": "^5.1.65"
+  },
+  "dependencies": {
+    "abi-decoder": "^2.4.0"
   }
 }
