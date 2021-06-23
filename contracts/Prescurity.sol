@@ -60,14 +60,16 @@ contract Prescurity {
     }
 
     mapping (uint => Patient) patient_num_secu_map;
+    mapping(address => Patient) patient_address_map;
     mapping (address => authentification) patient_authentification;
     mapping (uint => Doctor) doctor_id_map;
     mapping (address => Doctor) doctor_address_map;
     mapping (address => authentification) doctor_authentification;
-    mapping (uint => Pharmacy) pharma_id_map;
+    mapping (uint => Pharmacy) pharmacy_id_map;
     mapping (address => Pharmacy) pharmacy_address_map;
     mapping (address => authentification) pharmacy_authentification;
     mapping (uint => Prescription) presc_id_map;
+    mapping(uint => Admin)admin_id_map;
     mapping (address => authentification) admin_authentification;
 
     modifier patient_only() {
@@ -101,24 +103,42 @@ contract Prescurity {
      }
 
      function add_doctor(address addr, uint id, string calldata name, string calldata speciality) external admin_only {
-         require(doctor_address_map[addr].isValue, "This address is already defined as a doctor");
-         doctor_address_map[addr].id = id;
-         doctor_address_map[addr].speciality = speciality;
-         doctor_address_map[addr].name = name;
-         doctor_address_map[addr].doctor_address = addr;
-         doctor_address_map[addr].isValue = true;
-         doctor_authentification[addr] = authentification.doctor;
+        require(doctor_id_map[id].isValue, "This address is already defined as a doctor");
+        doctor_id_map[id].id = id;
+        doctor_id_map[id].speciality = speciality;
+        doctor_id_map[id].name = name;
+        doctor_id_map[id].doctor_address = addr;
+        doctor_id_map[id].isValue = true;
+        doctor_authentification[addr] = authentification.doctor;
      }
  
 
     function add_pharmacy(address addr, uint id, string calldata name) external admin_only {
-         require(pharmacy_address_map[addr].isValue, "This address is already defined as a doctor");
-         pharmacy_address_map[addr].id = id;
-         pharmacy_address_map[addr].name = name;
-         pharmacy_address_map[addr].pharmacy_address = addr;
-         pharmacy_address_map[addr].isValue = true;
-         pharmacy_authentification[addr] = authentification.pharmacy;
+        require(pharmacy_id_map[id].isValue, "This address is already defined as a pharmacie");
+        pharmacy_id_map[id].id = id;
+        pharmacy_id_map[id].name = name;
+        pharmacy_id_map[id].pharmacy_address = addr;
+        pharmacy_id_map[id].isValue = true;
+        pharmacy_authentification[addr] = authentification.pharmacy;
      }
+
+    function add_admin(address addr, uint id)external admin_only{
+        require(!doctor_id_map[id].isValue,"this addres is already defined as a doctor");
+        require(!pharmacy_id_map[id].isValue,"this addres is already defined as a pharmacy");
+        require(!patient_num_secu_map[id].isValue,"this addres is already defined as a patient");
+        admin_id_map[id].id=id;
+        admin_id_map[id].isValue=true;
+        admin_authentification[addr]=authentification.admin;
+    }
+
+    function add_patient(uint numero_secu,address addr)external{
+    require(!patient_num_secu_map[numero_secu].isValue,"this address is already defined as a patient");
+    patient_num_secu_map[numero_secu].numero_secu=numero_secu;
+    patient_num_secu_map[numero_secu].isValue=true;
+    patient_authentification[addr]=authentification.patient;
+
+    }
+
 
 
      event Consultation(Patient patient, Doctor doctor, uint amount);
