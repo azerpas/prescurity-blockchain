@@ -4,6 +4,11 @@ pragma experimental ABIEncoderV2;
 
 /// @title Prescription made by the doctor after a consultation
 contract Prescurity {
+
+    /**
+     * @dev Owner should be the admin
+     * He is responsible for adding Doctors and Pharmacists
+     */
     address private _owner;
     struct Admin {
         uint id;
