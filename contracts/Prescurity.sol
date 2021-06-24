@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 /// @title Prescription made by the doctor after a consultation
 contract Prescurity {
-    address internal owner;
+    address private _owner;
     struct Admin {
         uint id;
         address admin_address;
@@ -46,10 +46,10 @@ contract Prescurity {
         bool isValue;
     } 
 
-    constructor() public {
-        owner=msg.sender;
+    // set owner as first interactor with the contract
+    constructor() {
+        _set_owner(msg.sender);
     }
-
 
     enum authentification {
         anon,
@@ -114,7 +114,7 @@ contract Prescurity {
         if (patient_authentification[msg.sender] == authentification.patient) {
             return "patient";
         }
-        return "";
+        return "none";
     }
 
     function add_doctor(address addr, uint id, string calldata name, string calldata speciality) external admin_only {
@@ -136,11 +136,11 @@ contract Prescurity {
         pharmacy_authentification[addr] = authentification.pharmacy;
     }
 
-    function add_admin(address addr, uint id) external admin_only {
+    function set_admin(address addr, uint id) private {
         require(!admin_id_map[id].isValue, "This address is already defined as a admin");
         admin_id_map[id].id=id;
         admin_id_map[id].isValue=true;
-        admin_authentification[addr]=authentification.admin;
+        admin_authentification[addr] = authentification.admin;
     }
 
     function add_patient(uint numero_secu, address addr) external {
@@ -149,7 +149,15 @@ contract Prescurity {
         patient_num_secu_map[numero_secu].isValue=true;
         patient_authentification[addr]=authentification.patient;
     }
+
+    function _set_owner(address new_owner) private {
+        address old_owner = _owner;
+        _owner = new_owner;
+        //TODO: set admin to new owner
+        emit DefineOwnership(old_owner, new_owner);
+    }
     
+    event DefineOwnership(address indexed old_owner, address indexed new_owner);
     event Consultation(Patient patient, Doctor doctor, uint amount);
     event RetrieveMedicaments(Patient patient, Pharmacy pharmacy, Prescription prescription);
 }
