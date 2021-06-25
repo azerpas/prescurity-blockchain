@@ -43,9 +43,8 @@ contract Prescurity {
         string medicine;
         string disease;
         string frequency;
-        string start_timestamp;
-        string end_timestamp;
-        bool isValue;
+        uint256 start_timestamp;
+        uint256 end_timestamp;
         bool claimed;
     } 
 
@@ -73,6 +72,7 @@ contract Prescurity {
     mapping (address => Pharmacy) pharmacy_address_map;
     mapping (address => authentification) pharmacy_authentification;
     mapping (uint => Prescription) presc_id_map;
+    mapping (uint => Prescription) prescription_id_map;
 
     modifier patient_only() {
         if (patient_authentification[msg.sender] == authentification.patient) {
@@ -106,6 +106,32 @@ contract Prescurity {
         }
     }
 
+    function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint j = _i;
+        uint len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint k = len;
+        while (_i != 0) {
+            k = k-1;
+            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
+            bytes1 b1 = bytes1(temp);
+            bstr[k] = b1;
+            _i /= 10;
+        }
+        return string(bstr);
+    }
+
+    function append(string memory a, string memory b) internal pure returns (string memory) {
+        return string(abi.encodePacked(a, b));
+    }
+
     function owner() public view returns (address) {
         return _owner;
     }
@@ -133,7 +159,7 @@ contract Prescurity {
 
     function add_doctor(address addr, string calldata name, string calldata speciality) external owner_only {
         require(doctor_authentification[addr] != authentification.doctor, "This address is already defined as a doctor");
-        // TODO: check if he's not a pharmacist
+        require(pharmacy_authentification[addr] != authentification.pharmacy, "This address is already defined as a doctor");
         uint id = getDoctorId();
         doctor_id_map[id].id = id;
         doctor_id_map[id].speciality = speciality;
@@ -157,17 +183,25 @@ contract Prescurity {
      */
     function add_patient(uint numero_secu, address addr) external {
         require(!patient_num_secu_map[numero_secu].isValue, "This num secu is already defined as a patient");
-        patient_num_secu_map[numero_secu].numero_secu=numero_secu;
-        patient_num_secu_map[numero_secu].isValue=true;
-        patient_authentification[addr]=authentification.patient;
+        patient_num_secu_map[numero_secu].numero_secu = numero_secu;
+        patient_num_secu_map[numero_secu].isValue = true;
+        patient_num_secu_map[numero_secu].patient_address = addr;
+        patient_authentification[addr] = authentification.patient;
     }
 
-    function add_prescription(uint amountAskedByDoctor, uint numero_secu) payable external doctor_only {
-        require(msg.value == amountAskedByDoctor, "");
+    function add_prescription(uint amountAskedByDoctor, uint numero_secu, string calldata medicine, string calldata disease, string calldata frequency) payable external doctor_only {
+        require(msg.value == amountAskedByDoctor, append("Please match the asked value by the doctor: ",uint2str(amountAskedByDoctor)));
         Doctor storage doctor = doctor_address_map[msg.sender];
         Patient storage patient = patient_num_secu_map[numero_secu];
         uint prescriptionId = getPrescriptionId();
-        // TODO: prescription_id_map[prescriptionId]. ... = ...;
+        prescription_id_map[prescriptionId].claimed = false;
+        prescription_id_map[prescriptionId].patient_id = numero_secu;
+        prescription_id_map[prescriptionId].doctor_id = doctor.id;
+        prescription_id_map[prescriptionId].medicine = medicine;
+        prescription_id_map[prescriptionId].frequency = frequency;
+        prescription_id_map[prescriptionId].disease = disease;
+        prescription_id_map[prescriptionId].start_timestamp = block.timestamp;
+        prescription_id_map[prescriptionId].end_timestamp = block.timestamp + 93 days;
         emit Consultation(patient, doctor, amountAskedByDoctor);
     }
 
