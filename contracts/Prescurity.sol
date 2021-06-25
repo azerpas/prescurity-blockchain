@@ -4,12 +4,7 @@ pragma experimental ABIEncoderV2;
 
 /// @title Prescription made by the doctor after a consultation
 contract Prescurity {
-    address internal owner;
-    struct Admin {
-        uint id;
-        address admin_address;
-        bool isValue;
-    }
+    address private _owner;
 
     struct Patient {
         uint numero_secu;
@@ -46,20 +41,20 @@ contract Prescurity {
         bool isValue;
     } 
 
-    constructor() public {
-        owner=msg.sender;
-    }
+     constructor() {
+         _set_owner(msg.sender);
+     }
 
 
     enum authentification {
         anon,
         patient,
         doctor,
-        pharmacy,
-        admin
+        pharmacy
     }
 
     mapping (uint => Patient) patient_num_secu_map;
+    mapping (address=>bool) wallets;
     mapping(address => Patient) patient_address_map;
     mapping (address => authentification) patient_authentification;
     mapping (uint => Doctor) doctor_id_map;
@@ -69,7 +64,6 @@ contract Prescurity {
     mapping (address => Pharmacy) pharmacy_address_map;
     mapping (address => authentification) pharmacy_authentification;
     mapping (uint => Prescription) presc_id_map;
-    mapping(uint => Admin) admin_id_map;
     mapping (address => authentification) admin_authentification;
 
     modifier patient_only() {
@@ -96,14 +90,22 @@ contract Prescurity {
         }
     }
     
-    modifier admin_only(){
-        if (admin_authentification[msg.sender] == authentification.admin) {
-            _;
-        } else {
-            revert("Sorry, this function is reserved to the admin");
-        }
+    modifier owner_only(){
+         if (owner() == msg.sender) {
+             _;
+         } else {
+             revert("Sorry, this function is reserved to the owner of the smart contract");
+         }
+     }
+     
+     function setWallet(address _wallet) public{
+        wallets[_wallet]=true;
     }
-
+    
+     function owner() public view virtual returns (address) {
+         return _owner;
+     }
+     
     function get_user_type() view public returns (string memory) {
         if (doctor_authentification[msg.sender] == authentification.doctor) {
             return "doctor";
@@ -114,42 +116,52 @@ contract Prescurity {
         if (patient_authentification[msg.sender] == authentification.patient) {
             return "patient";
         }
-        return "";
+        return "none";
     }
 
-    function add_doctor(address addr, uint id, string calldata name, string calldata speciality) external admin_only {
-        require(!doctor_id_map[id].isValue, "This address is already defined as a doctor");
+    function add_doctor(address addr, uint id, string calldata name, string calldata speciality) external owner_only {
+        require(!doctor_id_map[id].isValue, "This id is already defined as a doctor");
+        require(!wallets[addr], "This address is already defined");
         doctor_id_map[id].id = id;
         doctor_id_map[id].speciality = speciality;
         doctor_id_map[id].name = name;
         doctor_id_map[id].doctor_address = addr;
         doctor_id_map[id].isValue = true;
         doctor_authentification[addr] = authentification.doctor;
+        setWallet(addr);
     }
 
-    function add_pharmacy(address addr, uint id, string calldata name) external admin_only {
+    function add_pharmacy(address addr, uint id, string calldata name) external owner_only {
         require(!pharmacy_id_map[id].isValue, "This address is already defined as a pharmacy");
+        require(!wallets[addr], "This address is already defined");
         pharmacy_id_map[id].id = id;
         pharmacy_id_map[id].name = name;
         pharmacy_id_map[id].pharmacy_address = addr;
         pharmacy_id_map[id].isValue = true;
         pharmacy_authentification[addr] = authentification.pharmacy;
+        setWallet(addr);
     }
 
-    function add_admin(address addr, uint id) external admin_only {
-        require(!admin_id_map[id].isValue, "This address is already defined as a admin");
-        admin_id_map[id].id=id;
-        admin_id_map[id].isValue=true;
-        admin_authentification[addr]=authentification.admin;
-    }
-
-    function add_patient(uint numero_secu, address addr) external {
-        require(!patient_num_secu_map[numero_secu].isValue, "This address is already defined as a patient");
+    function add_patient(uint numero_secu, address addr) external  {
+        require(!patient_num_secu_map[numero_secu].isValue, "This id is already defined as a patient");
+        require(!wallets[addr], "This address is already defined");
         patient_num_secu_map[numero_secu].numero_secu=numero_secu;
         patient_num_secu_map[numero_secu].isValue=true;
-        patient_authentification[addr]=authentification.patient;
+        patient_authentification[addr] = authentification.patient;
+        setWallet(addr);
     }
     
+    
+    function _set_owner(address new_owner) private {
+         address old_owner = _owner;
+         _owner = new_owner;
+         setWallet(new_owner);
+         //TODO: set admin to new owner
+         emit DefineOwnership(old_owner, new_owner);
+     }
+
+
+    event DefineOwnership(address indexed old_owner, address indexed new_owner);
     event Consultation(Patient patient, Doctor doctor, uint amount);
     event RetrieveMedicaments(Patient patient, Pharmacy pharmacy, Prescription prescription);
 }
