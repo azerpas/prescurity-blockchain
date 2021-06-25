@@ -12,6 +12,11 @@ contract Prescurity {
         uint[] prescriptions_ids;
         bool isValue;
     }
+    
+    struct Consultation{
+        uint amount;
+        bool paid;
+    }
 
     struct Doctor {
         uint id;
@@ -53,6 +58,7 @@ contract Prescurity {
         pharmacy
     }
 
+    mapping(address=>Consultation) consultations;
     mapping (uint => Patient) patient_num_secu_map;
     mapping (address=>bool) wallets;
     mapping(address => Patient) patient_address_map;
@@ -159,9 +165,22 @@ contract Prescurity {
          //TODO: set admin to new owner
          emit DefineOwnership(old_owner, new_owner);
      }
+     
+     function payementConsultation() payable external {
+        Consultation storage consultation = consultations[msg.sender];
+        require(consultation.amount >= 25 ether,'not enought');
+        require(consultation.paid == false,'deja recup');
+        consultation.paid=true;
+        payable(msg.sender).transfer(consultation.amount);
+     } 
+     
+     function addConsultation(address addr) external payable{
+         consultations[addr]=Consultation(msg.value,false);
+         
+     }
 
 
     event DefineOwnership(address indexed old_owner, address indexed new_owner);
-    event Consultation(Patient patient, Doctor doctor, uint amount);
+    event Consultationev(address patient, address doctor, uint amount);
     event RetrieveMedicaments(Patient patient, Pharmacy pharmacy, Prescription prescription);
 }
