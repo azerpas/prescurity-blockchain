@@ -10,11 +10,6 @@ contract Prescurity {
      * He is responsible for adding Doctors and Pharmacists
      */
     address private _owner;
-    struct Admin {
-        uint id;
-        address admin_address;
-        bool isValue;
-    }
 
     struct Patient {
         uint numero_secu;
@@ -60,8 +55,7 @@ contract Prescurity {
         anon,
         patient,
         doctor,
-        pharmacy,
-        admin
+        pharmacy
     }
 
     mapping (uint => Patient) patient_num_secu_map;
@@ -74,8 +68,6 @@ contract Prescurity {
     mapping (address => Pharmacy) pharmacy_address_map;
     mapping (address => authentification) pharmacy_authentification;
     mapping (uint => Prescription) presc_id_map;
-    mapping(uint => Admin) admin_id_map;
-    mapping (address => authentification) admin_authentification;
 
     modifier patient_only() {
         if (patient_authentification[msg.sender] == authentification.patient) {
@@ -101,12 +93,16 @@ contract Prescurity {
         }
     }
     
-    modifier admin_only(){
-        if (admin_authentification[msg.sender] == authentification.admin) {
+    modifier owner_only(){
+        if (owner() == msg.sender) {
             _;
         } else {
-            revert("Sorry, this function is reserved to the admin");
+            revert("Sorry, this function is reserved to the owner of the smart contract");
         }
+    }
+
+    function owner() public view virtual returns (address) {
+        return _owner;
     }
 
     function get_user_type() view public returns (string memory) {
@@ -122,7 +118,7 @@ contract Prescurity {
         return "none";
     }
 
-    function add_doctor(address addr, uint id, string calldata name, string calldata speciality) external admin_only {
+    function add_doctor(address addr, uint id, string calldata name, string calldata speciality) external owner_only {
         require(!doctor_id_map[id].isValue, "This address is already defined as a doctor");
         doctor_id_map[id].id = id;
         doctor_id_map[id].speciality = speciality;
@@ -132,20 +128,13 @@ contract Prescurity {
         doctor_authentification[addr] = authentification.doctor;
     }
 
-    function add_pharmacy(address addr, uint id, string calldata name) external admin_only {
+    function add_pharmacy(address addr, uint id, string calldata name) external owner_only {
         require(!pharmacy_id_map[id].isValue, "This address is already defined as a pharmacy");
         pharmacy_id_map[id].id = id;
         pharmacy_id_map[id].name = name;
         pharmacy_id_map[id].pharmacy_address = addr;
         pharmacy_id_map[id].isValue = true;
         pharmacy_authentification[addr] = authentification.pharmacy;
-    }
-
-    function set_admin(address addr, uint id) private {
-        require(!admin_id_map[id].isValue, "This address is already defined as a admin");
-        admin_id_map[id].id=id;
-        admin_id_map[id].isValue=true;
-        admin_authentification[addr] = authentification.admin;
     }
 
     function add_patient(uint numero_secu, address addr) external {
