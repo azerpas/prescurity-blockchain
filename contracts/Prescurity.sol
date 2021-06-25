@@ -168,6 +168,7 @@ contract Prescurity {
         doctor_id_map[id].name = name;
         doctor_id_map[id].doctor_address = addr;
         doctor_id_map[id].isValue = true;
+        doctor_address_map[addr].id = id;
         doctor_authentification[addr] = authentification.doctor;
     }
 
@@ -177,6 +178,7 @@ contract Prescurity {
         pharmacy_id_map[id].name = name;
         pharmacy_id_map[id].pharmacy_address = addr;
         pharmacy_id_map[id].isValue = true;
+        pharmacy_address_map[addr].id = id;
         pharmacy_authentification[addr] = authentification.pharmacy;
     }
 
@@ -196,6 +198,7 @@ contract Prescurity {
         Doctor storage doctor = doctor_address_map[msg.sender];
         Patient storage patient = patient_num_secu_map[numero_secu];
         uint prescriptionId = getPrescriptionId();
+        prescription_id_map[prescriptionId].id = prescriptionId;
         prescription_id_map[prescriptionId].claimed = false;
         prescription_id_map[prescriptionId].paid = false;
         prescription_id_map[prescriptionId].patient_id = numero_secu;
@@ -210,8 +213,14 @@ contract Prescurity {
     }
 
     function pay_prescription(uint prescriptionId) payable external patient_only {
-        address payable doctorAddr = doctor_id_map[prescription_id_map[prescriptionId].doctor_id].doctor_address;
+        require(address(this).balance >= msg.value, "Balance is not enough");
+        require(!prescription_id_map[prescriptionId].paid, "Prescription should not be paid");
+        Prescription storage prescription = prescription_id_map[prescriptionId];
+        Doctor storage doctor = doctor_id_map[prescription.doctor_id];
+        address payable doctorAddr = doctor.doctor_address;
         doctorAddr.transfer(msg.value);
+        emit LogDoctor(doctor.speciality, doctor.doctor_address, doctor.name, prescription.doctor_id);
+        emit DoctorPaid(msg.value, doctor.doctor_address, msg.sender, prescription.doctor_id);
         prescription_id_map[prescriptionId].paid = true;
     }
 
@@ -235,5 +244,7 @@ contract Prescurity {
     
     event DefineOwnership(address indexed old_owner, address indexed new_owner);
     event Consultation(Prescription prescription, Patient patient, Doctor doctor, uint amount);
+    event LogDoctor(string speciality, address indexed doctorAddress, string name, uint doctorId);
+    event DoctorPaid(uint amount, address indexed doctorAddress, address indexed patientAddress, uint doctorId);
     event RetrieveMedicaments(Patient patient, Pharmacy pharmacy, Prescription prescription);
 }
