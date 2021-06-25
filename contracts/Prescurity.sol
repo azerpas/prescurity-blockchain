@@ -47,7 +47,7 @@ contract Prescurity {
     } 
 
     // set owner as first interactor with the contract
-    constructor() {
+    constructor() public {
         _set_owner(msg.sender);
     }
 
@@ -101,7 +101,7 @@ contract Prescurity {
         }
     }
 
-    function owner() public view virtual returns (address) {
+    function owner() public view returns (address) {
         return _owner;
     }
 
