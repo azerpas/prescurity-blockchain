@@ -219,13 +219,14 @@ contract Prescurity {
         Doctor storage doctor = doctor_id_map[prescription.doctor_id];
         address payable doctorAddr = doctor.doctor_address;
         doctorAddr.transfer(msg.value);
-        emit LogDoctor(doctor.speciality, doctor.doctor_address, doctor.name, prescription.doctor_id);
         emit DoctorPaid(msg.value, doctor.doctor_address, msg.sender, prescription.doctor_id);
         prescription_id_map[prescriptionId].paid = true;
     }
 
     function claim_prescription(uint amountAskedByPharmacy, uint prescriptionId) external pharmacy_only {
+        // require(prescription_id_map[prescriptionId].claimed == false, "sinon");
         // set prescription_id_map[prescriptionId].claimed = true;
+        // emit MedicineGiven(...);
     }
 
     function _set_owner(address new_owner) private {
@@ -244,7 +245,6 @@ contract Prescurity {
     
     event DefineOwnership(address indexed old_owner, address indexed new_owner);
     event Consultation(Prescription prescription, Patient patient, Doctor doctor, uint amount);
-    event LogDoctor(string speciality, address indexed doctorAddress, string name, uint doctorId);
     event DoctorPaid(uint amount, address indexed doctorAddress, address indexed patientAddress, uint doctorId);
     event RetrieveMedicaments(Patient patient, Pharmacy pharmacy, Prescription prescription);
 }
