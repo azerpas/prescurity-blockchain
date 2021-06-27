@@ -64,20 +64,20 @@ contract Prescurity {
         pharmacy
     }
 
-    mapping (uint => Patient) patient_num_secu_map;
-    mapping(address => Patient) patient_address_map;
-    mapping (address => authentification) patient_authentification;
-    mapping (uint => Doctor) doctor_id_map;
-    mapping (address => Doctor) doctor_address_map;
-    mapping (address => authentification) doctor_authentification;
-    mapping (uint => Pharmacy) pharmacy_id_map;
-    mapping (address => Pharmacy) pharmacy_address_map;
-    mapping (address => authentification) pharmacy_authentification;
-    mapping (uint => Prescription) presc_id_map;
-    mapping (uint => Prescription) prescription_id_map;
+    mapping (uint => Patient) patientNumSecuMap;
+    mapping(address => Patient) patientAddressMap;
+    mapping (address => authentification) patientAuthentification;
+    mapping (uint => Doctor) doctorIdMap;
+    mapping (address => Doctor) doctorAddressMap;
+    mapping (address => authentification) doctorAuthentification;
+    mapping (uint => Pharmacy) pharmacyIdMap;
+    mapping (address => Pharmacy) pharmacyAddressMap;
+    mapping (address => authentification) pharmacyAuthentification;
+    mapping (uint => Prescription) prescIdMap;
+    mapping (uint => Prescription) prescriptionIdMap;
 
     modifier patientOnly() {
-        if (patient_authentification[msg.sender] == authentification.patient) {
+        if (patientAuthentification[msg.sender] == authentification.patient) {
             _;
         } else {
             revert("Sorry, this function is reserved to the patient");
@@ -85,7 +85,7 @@ contract Prescurity {
     }
 
     modifier doctorOnly() {
-        if (doctor_authentification[msg.sender] == authentification.doctor) {
+        if (doctorAuthentification[msg.sender] == authentification.doctor) {
             _;
         } else {
             revert("Sorry, this function is reserved to the doctor");
@@ -93,7 +93,7 @@ contract Prescurity {
     }
     
     modifier pharmacyOnly(){
-        if (pharmacy_authentification[msg.sender] == authentification.pharmacy) {
+        if (pharmacyAuthentification[msg.sender] == authentification.pharmacy) {
             _;
         } else {
             revert("Sorry, this function is reserved to the pharmacy");
@@ -147,85 +147,85 @@ contract Prescurity {
     }
 
     function getUserType() view public returns (string memory) {
-        if (doctor_authentification[msg.sender] == authentification.doctor) {
+        if (doctorAuthentification[msg.sender] == authentification.doctor) {
             return "doctor";
         }
-        if (pharmacy_authentification[msg.sender] == authentification.pharmacy) {
+        if (pharmacyAuthentification[msg.sender] == authentification.pharmacy) {
             return "pharmacy";
         }
-        if (patient_authentification[msg.sender] == authentification.patient) {
+        if (patientAuthentification[msg.sender] == authentification.patient) {
             return "patient";
         }
         return "none";
     }
 
     function addDoctor(address payable addr, string calldata name, string calldata speciality) external ownerOnly {
-        require(doctor_authentification[addr] != authentification.doctor, "This address is already defined as a doctor");
-        require(pharmacy_authentification[addr] != authentification.pharmacy, "This address is already defined as a doctor");
+        require(doctorAuthentification[addr] != authentification.doctor, "This address is already defined as a doctor");
+        require(pharmacyAuthentification[addr] != authentification.pharmacy, "This address is already defined as a doctor");
         uint id = getDoctorId();
-        doctor_id_map[id].id = id;
-        doctor_id_map[id].speciality = speciality;
-        doctor_id_map[id].name = name;
-        doctor_id_map[id].doctorAddress = addr;
-        doctor_id_map[id].isValue = true;
-        doctor_address_map[addr].id = id;
-        doctor_authentification[addr] = authentification.doctor;
+        doctorIdMap[id].id = id;
+        doctorIdMap[id].speciality = speciality;
+        doctorIdMap[id].name = name;
+        doctorIdMap[id].doctorAddress = addr;
+        doctorIdMap[id].isValue = true;
+        doctorAddressMap[addr].id = id;
+        doctorAuthentification[addr] = authentification.doctor;
     }
 
     function addPharmacy(address addr, uint id, string calldata name) external ownerOnly {
-        require(!pharmacy_id_map[id].isValue, "This address is already defined as a pharmacy");
-        pharmacy_id_map[id].id = id;
-        pharmacy_id_map[id].name = name;
-        pharmacy_id_map[id].pharmacyAddress = addr;
-        pharmacy_id_map[id].isValue = true;
-        pharmacy_address_map[addr].id = id;
-        pharmacy_authentification[addr] = authentification.pharmacy;
+        require(!pharmacyIdMap[id].isValue, "This address is already defined as a pharmacy");
+        pharmacyIdMap[id].id = id;
+        pharmacyIdMap[id].name = name;
+        pharmacyIdMap[id].pharmacyAddress = addr;
+        pharmacyIdMap[id].isValue = true;
+        pharmacyAddressMap[addr].id = id;
+        pharmacyAuthentification[addr] = authentification.pharmacy;
     }
 
     /**
      * @dev problème: une personne mal-intentionée pourrait lier un numéro de sécu ne lui appartenant pas à une addresse quelconque 
      */
     function addPatient(uint numero_secu, address addr) external {
-        require(!patient_num_secu_map[numero_secu].isValue, "This num secu is already defined as a patient");
-        patient_num_secu_map[numero_secu].numero_secu = numero_secu;
-        patient_num_secu_map[numero_secu].isValue = true;
-        patient_num_secu_map[numero_secu].patientAddress = addr;
-        patient_authentification[addr] = authentification.patient;
+        require(!patientNumSecuMap[numero_secu].isValue, "This num secu is already defined as a patient");
+        patientNumSecuMap[numero_secu].numero_secu = numero_secu;
+        patientNumSecuMap[numero_secu].isValue = true;
+        patientNumSecuMap[numero_secu].patientAddress = addr;
+        patientAuthentification[addr] = authentification.patient;
     }
 
     function addPrescription(uint amountAskedByDoctor, uint numero_secu, string calldata medicine, string calldata disease, string calldata frequency) external doctorOnly {
         //require(msg.value == amountAskedByDoctor, append("Please match the asked value by the doctor: ",uint2str(amountAskedByDoctor)));
-        Doctor storage doctor = doctor_address_map[msg.sender];
-        Patient storage patient = patient_num_secu_map[numero_secu];
+        Doctor storage doctor = doctorAddressMap[msg.sender];
+        Patient storage patient = patientNumSecuMap[numero_secu];
         uint prescriptionId = getPrescriptionId();
-        prescription_id_map[prescriptionId].id = prescriptionId;
-        prescription_id_map[prescriptionId].claimed = false;
-        prescription_id_map[prescriptionId].paid = false;
-        prescription_id_map[prescriptionId].patientId = numero_secu;
-        prescription_id_map[prescriptionId].doctorId = doctor.id;
-        prescription_id_map[prescriptionId].medicine = medicine;
-        prescription_id_map[prescriptionId].frequency = frequency;
-        prescription_id_map[prescriptionId].disease = disease;
-        prescription_id_map[prescriptionId].dueToDoctor = amountAskedByDoctor;
-        prescription_id_map[prescriptionId].startTimestamp = block.timestamp;
-        prescription_id_map[prescriptionId].endTimestamp = block.timestamp + 93 days;
-        emit Consultation(prescription_id_map[prescriptionId], patient, doctor, amountAskedByDoctor);
+        prescriptionIdMap[prescriptionId].id = prescriptionId;
+        prescriptionIdMap[prescriptionId].claimed = false;
+        prescriptionIdMap[prescriptionId].paid = false;
+        prescriptionIdMap[prescriptionId].patientId = numero_secu;
+        prescriptionIdMap[prescriptionId].doctorId = doctor.id;
+        prescriptionIdMap[prescriptionId].medicine = medicine;
+        prescriptionIdMap[prescriptionId].frequency = frequency;
+        prescriptionIdMap[prescriptionId].disease = disease;
+        prescriptionIdMap[prescriptionId].dueToDoctor = amountAskedByDoctor;
+        prescriptionIdMap[prescriptionId].startTimestamp = block.timestamp;
+        prescriptionIdMap[prescriptionId].endTimestamp = block.timestamp + 93 days;
+        emit Consultation(prescriptionIdMap[prescriptionId], patient, doctor, amountAskedByDoctor);
     }
 
     function payPrescription(uint prescriptionId) payable external patientOnly {
         require(address(this).balance >= msg.value, "Balance is not enough");
-        require(!prescription_id_map[prescriptionId].paid, "Prescription should not be paid");
-        Prescription storage prescription = prescription_id_map[prescriptionId];
-        Doctor storage doctor = doctor_id_map[prescription.doctorId];
+        require(!prescriptionIdMap[prescriptionId].paid, "Prescription should not be paid");
+        Prescription storage prescription = prescriptionIdMap[prescriptionId];
+        Doctor storage doctor = doctorIdMap[prescription.doctorId];
         address payable doctorAddr = doctor.doctorAddress;
         doctorAddr.transfer(msg.value);
         emit DoctorPaid(msg.value, doctor.doctorAddress, msg.sender, prescription.doctorId);
-        prescription_id_map[prescriptionId].paid = true;
+        prescriptionIdMap[prescriptionId].paid = true;
     }
 
     function claimPrescription(uint amountAskedByPharmacy, uint prescriptionId) external pharmacyOnly {
-        // require(prescription_id_map[prescriptionId].claimed == false, "sinon");
-        // set prescription_id_map[prescriptionId].claimed = true;
+        // require(prescriptionIdMap[prescriptionId].claimed == false, "sinon");
+        // set prescriptionIdMap[prescriptionId].claimed = true;
         // emit MedicineGiven(...);
     }
 
