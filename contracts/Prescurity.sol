@@ -16,7 +16,7 @@ contract Prescurity {
 
     struct Patient {
         uint numero_secu;
-        address patient_address;
+        address patientAddress;
         uint[] prescriptions_ids;
         bool isValue;
     }
@@ -25,34 +25,34 @@ contract Prescurity {
         uint id;
         string speciality;
         string name;
-        address payable doctor_address;
+        address payable doctorAddress;
         bool isValue;
     }
 
     struct Pharmacy {
         uint id;
         string name;
-        address pharmacy_address;
+        address pharmacyAddress;
         bool isValue;
     }
     
     struct Prescription {
         uint id;
-        uint patient_id;
-        uint doctor_id;
+        uint patientId;
+        uint doctorId;
         string medicine;
         string disease;
         string frequency;
-        uint256 start_timestamp;
-        uint256 end_timestamp;
-        uint due_to_doctor;
+        uint256 startTimestamp;
+        uint256 endTimestamp;
+        uint dueToDoctor;
         bool claimed;
         bool paid;
     } 
 
     // set owner as first interactor with the contract
     constructor() public {
-        _set_owner(msg.sender);
+        _setOwner(msg.sender);
         _setDoctorId(1);
         _setPrescriptionId(1);
     }
@@ -76,7 +76,7 @@ contract Prescurity {
     mapping (uint => Prescription) presc_id_map;
     mapping (uint => Prescription) prescription_id_map;
 
-    modifier patient_only() {
+    modifier patientOnly() {
         if (patient_authentification[msg.sender] == authentification.patient) {
             _;
         } else {
@@ -84,7 +84,7 @@ contract Prescurity {
         }
     }
 
-    modifier doctor_only() {
+    modifier doctorOnly() {
         if (doctor_authentification[msg.sender] == authentification.doctor) {
             _;
         } else {
@@ -92,7 +92,7 @@ contract Prescurity {
         }
     }
     
-    modifier pharmacy_only(){
+    modifier pharmacyOnly(){
         if (pharmacy_authentification[msg.sender] == authentification.pharmacy) {
             _;
         } else {
@@ -100,8 +100,8 @@ contract Prescurity {
         }
     }
     
-    modifier owner_only(){
-        if (owner() == msg.sender) {
+    modifier ownerOnly(){
+        if (getOwner() == msg.sender) {
             _;
         } else {
             revert("Sorry, this function is reserved to the owner of the smart contract");
@@ -134,7 +134,7 @@ contract Prescurity {
         return string(abi.encodePacked(a, b));
     }
 
-    function owner() public view returns (address) {
+    function getOwner() public view returns (address) {
         return _owner;
     }
 
@@ -146,7 +146,7 @@ contract Prescurity {
         return _prescriptionId++;
     }
 
-    function get_user_type() view public returns (string memory) {
+    function getUserType() view public returns (string memory) {
         if (doctor_authentification[msg.sender] == authentification.doctor) {
             return "doctor";
         }
@@ -159,24 +159,24 @@ contract Prescurity {
         return "none";
     }
 
-    function add_doctor(address payable addr, string calldata name, string calldata speciality) external owner_only {
+    function addDoctor(address payable addr, string calldata name, string calldata speciality) external ownerOnly {
         require(doctor_authentification[addr] != authentification.doctor, "This address is already defined as a doctor");
         require(pharmacy_authentification[addr] != authentification.pharmacy, "This address is already defined as a doctor");
         uint id = getDoctorId();
         doctor_id_map[id].id = id;
         doctor_id_map[id].speciality = speciality;
         doctor_id_map[id].name = name;
-        doctor_id_map[id].doctor_address = addr;
+        doctor_id_map[id].doctorAddress = addr;
         doctor_id_map[id].isValue = true;
         doctor_address_map[addr].id = id;
         doctor_authentification[addr] = authentification.doctor;
     }
 
-    function add_pharmacy(address addr, uint id, string calldata name) external owner_only {
+    function addPharmacy(address addr, uint id, string calldata name) external ownerOnly {
         require(!pharmacy_id_map[id].isValue, "This address is already defined as a pharmacy");
         pharmacy_id_map[id].id = id;
         pharmacy_id_map[id].name = name;
-        pharmacy_id_map[id].pharmacy_address = addr;
+        pharmacy_id_map[id].pharmacyAddress = addr;
         pharmacy_id_map[id].isValue = true;
         pharmacy_address_map[addr].id = id;
         pharmacy_authentification[addr] = authentification.pharmacy;
@@ -185,15 +185,15 @@ contract Prescurity {
     /**
      * @dev problème: une personne mal-intentionée pourrait lier un numéro de sécu ne lui appartenant pas à une addresse quelconque 
      */
-    function add_patient(uint numero_secu, address addr) external {
+    function addPatient(uint numero_secu, address addr) external {
         require(!patient_num_secu_map[numero_secu].isValue, "This num secu is already defined as a patient");
         patient_num_secu_map[numero_secu].numero_secu = numero_secu;
         patient_num_secu_map[numero_secu].isValue = true;
-        patient_num_secu_map[numero_secu].patient_address = addr;
+        patient_num_secu_map[numero_secu].patientAddress = addr;
         patient_authentification[addr] = authentification.patient;
     }
 
-    function add_prescription(uint amountAskedByDoctor, uint numero_secu, string calldata medicine, string calldata disease, string calldata frequency) external doctor_only {
+    function addPrescription(uint amountAskedByDoctor, uint numero_secu, string calldata medicine, string calldata disease, string calldata frequency) external doctorOnly {
         //require(msg.value == amountAskedByDoctor, append("Please match the asked value by the doctor: ",uint2str(amountAskedByDoctor)));
         Doctor storage doctor = doctor_address_map[msg.sender];
         Patient storage patient = patient_num_secu_map[numero_secu];
@@ -201,35 +201,35 @@ contract Prescurity {
         prescription_id_map[prescriptionId].id = prescriptionId;
         prescription_id_map[prescriptionId].claimed = false;
         prescription_id_map[prescriptionId].paid = false;
-        prescription_id_map[prescriptionId].patient_id = numero_secu;
-        prescription_id_map[prescriptionId].doctor_id = doctor.id;
+        prescription_id_map[prescriptionId].patientId = numero_secu;
+        prescription_id_map[prescriptionId].doctorId = doctor.id;
         prescription_id_map[prescriptionId].medicine = medicine;
         prescription_id_map[prescriptionId].frequency = frequency;
         prescription_id_map[prescriptionId].disease = disease;
-        prescription_id_map[prescriptionId].due_to_doctor = amountAskedByDoctor;
-        prescription_id_map[prescriptionId].start_timestamp = block.timestamp;
-        prescription_id_map[prescriptionId].end_timestamp = block.timestamp + 93 days;
+        prescription_id_map[prescriptionId].dueToDoctor = amountAskedByDoctor;
+        prescription_id_map[prescriptionId].startTimestamp = block.timestamp;
+        prescription_id_map[prescriptionId].endTimestamp = block.timestamp + 93 days;
         emit Consultation(prescription_id_map[prescriptionId], patient, doctor, amountAskedByDoctor);
     }
 
-    function pay_prescription(uint prescriptionId) payable external patient_only {
+    function payPrescription(uint prescriptionId) payable external patientOnly {
         require(address(this).balance >= msg.value, "Balance is not enough");
         require(!prescription_id_map[prescriptionId].paid, "Prescription should not be paid");
         Prescription storage prescription = prescription_id_map[prescriptionId];
-        Doctor storage doctor = doctor_id_map[prescription.doctor_id];
-        address payable doctorAddr = doctor.doctor_address;
+        Doctor storage doctor = doctor_id_map[prescription.doctorId];
+        address payable doctorAddr = doctor.doctorAddress;
         doctorAddr.transfer(msg.value);
-        emit DoctorPaid(msg.value, doctor.doctor_address, msg.sender, prescription.doctor_id);
+        emit DoctorPaid(msg.value, doctor.doctorAddress, msg.sender, prescription.doctorId);
         prescription_id_map[prescriptionId].paid = true;
     }
 
-    function claim_prescription(uint amountAskedByPharmacy, uint prescriptionId) external pharmacy_only {
+    function claimPrescription(uint amountAskedByPharmacy, uint prescriptionId) external pharmacyOnly {
         // require(prescription_id_map[prescriptionId].claimed == false, "sinon");
         // set prescription_id_map[prescriptionId].claimed = true;
         // emit MedicineGiven(...);
     }
 
-    function _set_owner(address new_owner) private {
+    function _setOwner(address new_owner) private {
         address old_owner = _owner;
         _owner = new_owner;
         emit DefineOwnership(old_owner, new_owner);
