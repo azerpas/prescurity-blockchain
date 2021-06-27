@@ -17,7 +17,7 @@ contract Prescurity {
     struct Patient {
         uint numero_secu;
         address patientAddress;
-        uint[] prescriptions_ids;
+        uint[] prescriptionsIds;
         bool isValue;
     }
 
