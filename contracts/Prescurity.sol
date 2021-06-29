@@ -12,6 +12,7 @@ contract Prescurity {
     address private _owner;
 
     uint private _doctorId;
+    uint private _pharmacyId;
     uint private _prescriptionId;
 
     struct Patient {
@@ -54,6 +55,7 @@ contract Prescurity {
     constructor() public {
         _setOwner(msg.sender);
         _setDoctorId(1);
+        _setPharmacyId(1);
         _setPrescriptionId(1);
     }
 
@@ -175,8 +177,10 @@ contract Prescurity {
         doctorAuthentification[addr] = authentification.doctor;
     }
 
-    function addPharmacy(address addr, uint id, string calldata name) external ownerOnly {
-        require(!pharmacyIdMap[id].isValue, "This address is already defined as a pharmacy");
+    function addPharmacy(address addr, string calldata name) external ownerOnly {
+        require(pharmacyAuthentification[addr] != authentification.pharmacy, "This address is already defined as a doctor");
+        require(doctorAuthentification[addr] != authentification.doctor, "This address is already defined as a doctor");
+        uint id = getDoctorId();
         pharmacyIdMap[id].id = id;
         pharmacyIdMap[id].name = name;
         pharmacyIdMap[id].pharmacyAddress = addr;
@@ -240,6 +244,10 @@ contract Prescurity {
 
     function _setDoctorId(uint index) private {
         _doctorId = index;
+    }
+
+    function _setPharmacyId(uint index) private {
+        _pharmacyId = index;
     }
 
     function _setPrescriptionId(uint index) private {
