@@ -156,6 +156,9 @@ contract Prescurity {
         if (patientAuthentification[msg.sender] == authentification.patient) {
             return "patient";
         }
+        if(msg.sender == getOwner()){
+            return "owner";
+        }
         return "none";
     }
 
