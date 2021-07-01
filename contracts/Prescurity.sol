@@ -205,6 +205,7 @@ contract Prescurity {
         Doctor storage doctor = doctorAddressMap[msg.sender];
         Patient storage patient = patientNumSecuMap[numero_secu];
         uint prescriptionId = getPrescriptionId();
+        patient.prescriptionsIds.push(prescriptionId);
         prescriptionIdMap[prescriptionId].id = prescriptionId;
         prescriptionIdMap[prescriptionId].claimed = false;
         prescriptionIdMap[prescriptionId].paid = false;
@@ -230,10 +231,28 @@ contract Prescurity {
         prescriptionIdMap[prescriptionId].paid = true;
     }
 
-    function claimPrescription(uint amountAskedByPharmacy, uint prescriptionId) external pharmacyOnly {
-        // require(prescriptionIdMap[prescriptionId].claimed == false, "sinon");
-        // set prescriptionIdMap[prescriptionId].claimed = true;
-        // emit MedicineGiven(...);
+    function claimPrescription(uint prescriptionId) external pharmacyOnly {
+        require(prescriptionIdMap[prescriptionId].claimed == false, "This presciption is already claimed");
+        Prescription storage prescription = prescriptionIdMap[prescriptionId];
+        Patient storage patient = patientNumSecuMap[prescription.patientId];
+        prescriptionIdMap[prescriptionId].claimed = true;
+        emit PharmaClaimed(prescription, msg.sender, patient);
+    }
+
+    function showPrescriptionPatient(uint numSecuPatient) external pharmacyOnly{
+        //require(numSecuPatient.length == 15, "not a secu number");
+
+        Patient storage patient = patientNumSecuMap[numSecuPatient];
+        uint len = 5;
+        if(patient.prescriptionsIds.length < 5){
+            len = patient.prescriptionsIds.length;
+        }
+        Prescription[] memory prescriptions = new Prescription[](len);
+        for(uint i=0; i < len; i++){
+            Prescription storage prescription = prescriptionIdMap[patient.prescriptionsIds[i]];
+            prescriptions[i] = prescription;
+        }
+        emit prescriptionsShow(prescriptions);
     }
 
     function _setOwner(address new_owner) private {
@@ -254,6 +273,8 @@ contract Prescurity {
         _prescriptionId = index;
     }
     
+    event prescriptionsShow(Prescription[] prescription);
+    event PharmaClaimed(Prescription prescription,address indexed pharmaaddress,Patient patient);
     event DefineOwnership(address indexed old_owner, address indexed new_owner);
     event Consultation(Prescription prescription, Patient patient, Doctor doctor, uint amount);
     event DoctorPaid(uint amount, address indexed doctorAddress, address indexed patientAddress, uint doctorId);
