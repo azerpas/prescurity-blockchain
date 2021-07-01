@@ -239,7 +239,7 @@ contract Prescurity {
         emit PharmaClaimed(prescription, msg.sender, patient);
     }
 
-    function showPrescriptionPatient(uint numSecuPatient) external pharmacyOnly{
+    function showPrescriptionPatient(uint numSecuPatient) view public pharmacyOnly returns(Prescription[] memory){
         //require(numSecuPatient.length == 15, "not a secu number");
 
         Patient storage patient = patientNumSecuMap[numSecuPatient];
@@ -252,7 +252,7 @@ contract Prescurity {
             Prescription storage prescription = prescriptionIdMap[patient.prescriptionsIds[i]];
             prescriptions[i] = prescription;
         }
-        emit prescriptionsShow(prescriptions);
+        return prescriptions;
     }
 
     function _setOwner(address new_owner) private {
