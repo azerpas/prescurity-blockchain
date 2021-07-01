@@ -27,6 +27,7 @@ contract Prescurity {
         string speciality;
         string name;
         address payable doctorAddress;
+        uint[] prescriptionIds;
         bool isValue;
     }
 
@@ -75,7 +76,6 @@ contract Prescurity {
     mapping (uint => Pharmacy) pharmacyIdMap;
     mapping (address => Pharmacy) pharmacyAddressMap;
     mapping (address => authentification) pharmacyAuthentification;
-    mapping (uint => Prescription) prescIdMap;
     mapping (uint => Prescription) prescriptionIdMap;
 
     modifier patientOnly() {
@@ -206,6 +206,7 @@ contract Prescurity {
         Patient storage patient = patientNumSecuMap[numero_secu];
         uint prescriptionId = getPrescriptionId();
         patient.prescriptionsIds.push(prescriptionId);
+        doctor.prescriptionIds.push(prescriptionId);
         prescriptionIdMap[prescriptionId].id = prescriptionId;
         prescriptionIdMap[prescriptionId].claimed = false;
         prescriptionIdMap[prescriptionId].paid = false;
@@ -253,6 +254,11 @@ contract Prescurity {
             prescriptions[i] = prescription;
         }
         return prescriptions;
+    }
+
+    function getPrescription(uint idprescription) view public doctorOnly returns(Prescription memory) {
+        Prescription storage prescription= prescriptionIdMap[idprescription];
+        return prescription;
     }
 
     function _setOwner(address new_owner) private {
