@@ -250,7 +250,7 @@ contract Prescurity {
         }
         Prescription[] memory prescriptions = new Prescription[](len);
         for(uint i=0; i < len; i++){
-            Prescription storage prescription = prescriptionIdMap[patient.prescriptionsIds[i]];
+            Prescription storage prescription = prescriptionIdMap[patient.prescriptionsIds[len-i]];
             prescriptions[i] = prescription;
         }
         return prescriptions;
