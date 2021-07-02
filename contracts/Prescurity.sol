@@ -267,6 +267,10 @@ contract Prescurity {
         emit DefineOwnership(old_owner, new_owner);
     }
 
+    function getDoctor(uint iddoctor) view public returns(Doctor memory) {
+        Doctor storage doctor= doctorIdMap[iddoctor];
+        return doctor;
+    }
     function _setDoctorId(uint index) private {
         _doctorId = index;
     }
