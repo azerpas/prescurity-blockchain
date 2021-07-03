@@ -257,8 +257,7 @@ contract Prescurity {
     }
 
     function getPrescription(uint idprescription) view public doctorOnly returns(Prescription memory) {
-        Prescription storage prescription= prescriptionIdMap[idprescription];
-        return prescription;
+        return prescriptionIdMap[idprescription];
     }
 
     function _setOwner(address new_owner) private {
