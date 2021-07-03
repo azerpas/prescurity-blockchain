@@ -244,13 +244,16 @@ contract Prescurity {
         //require(numSecuPatient.length == 15, "not a secu number");
 
         Patient storage patient = patientNumSecuMap[numSecuPatient];
-        uint len = 5;
+        uint len=5;
+        
         if(patient.prescriptionsIds.length < 5){
             len = patient.prescriptionsIds.length;
         }
+        
+        uint taille=patient.prescriptionsIds.length;
         Prescription[] memory prescriptions = new Prescription[](len);
         for(uint i=0; i < len; i++){
-            Prescription storage prescription = prescriptionIdMap[patient.prescriptionsIds[len-i]];
+            Prescription storage prescription = prescriptionIdMap[patient.prescriptionsIds[taille-1-i]];
             prescriptions[i] = prescription;
         }
         return prescriptions;
