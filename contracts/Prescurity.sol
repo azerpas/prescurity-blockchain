@@ -197,6 +197,7 @@ contract Prescurity {
         patientNumSecuMap[numero_secu].numero_secu = numero_secu;
         patientNumSecuMap[numero_secu].isValue = true;
         patientNumSecuMap[numero_secu].patientAddress = addr;
+        patientAddressMap[addr].numero_secu = numero_secu;
         patientAuthentification[addr] = authentification.patient;
     }
 
@@ -279,7 +280,7 @@ contract Prescurity {
         return patient;
     }
 
-    function getPatient(address patientaddress) view public returns(Patient memory) {
+    function getPatientAddress(address patientaddress) view public returns(Patient memory) {
         Patient storage patient = patientAddressMap[patientaddress];
         return patient;
     }
