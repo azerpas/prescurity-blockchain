@@ -279,6 +279,11 @@ contract Prescurity {
         return patient;
     }
 
+    function getPatient(address patientaddress) view public returns(Patient memory) {
+        Patient storage patient = patientAddressMap[patientaddress];
+        return patient;
+    }
+
     function _setDoctorId(uint index) private {
         _doctorId = index;
     }
