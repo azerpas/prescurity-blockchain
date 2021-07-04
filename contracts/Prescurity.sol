@@ -249,10 +249,10 @@ contract Prescurity {
         if(patient.prescriptionsIds.length < 5){
             len = patient.prescriptionsIds.length;
         }
-        
         uint taille=patient.prescriptionsIds.length;
         Prescription[] memory prescriptions = new Prescription[](len);
         for(uint i=0; i < len; i++){
+
             Prescription storage prescription = prescriptionIdMap[patient.prescriptionsIds[taille-1-i]];
             prescriptions[i] = prescription;
         }
@@ -260,8 +260,7 @@ contract Prescurity {
     }
 
     function getPrescription(uint idprescription) view public doctorOnly returns(Prescription memory) {
-        Prescription storage prescription= prescriptionIdMap[idprescription];
-        return prescription;
+        return prescriptionIdMap[idprescription];
     }
 
     function _setOwner(address new_owner) private {
