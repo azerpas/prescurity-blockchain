@@ -244,13 +244,16 @@ contract Prescurity {
         //require(numSecuPatient.length == 15, "not a secu number");
 
         Patient storage patient = patientNumSecuMap[numSecuPatient];
-        uint len = 5;
+        uint len=5;
+        
         if(patient.prescriptionsIds.length < 5){
             len = patient.prescriptionsIds.length;
         }
+        uint taille=patient.prescriptionsIds.length;
         Prescription[] memory prescriptions = new Prescription[](len);
         for(uint i=0; i < len; i++){
-            Prescription storage prescription = prescriptionIdMap[patient.prescriptionsIds[len-i-1]];
+
+            Prescription storage prescription = prescriptionIdMap[patient.prescriptionsIds[taille-1-i]];
             prescriptions[i] = prescription;
         }
         return prescriptions;
@@ -264,6 +267,16 @@ contract Prescurity {
         address old_owner = _owner;
         _owner = new_owner;
         emit DefineOwnership(old_owner, new_owner);
+    }
+
+    function getDoctor(uint iddoctor) view public returns(Doctor memory) {
+        Doctor storage doctor= doctorIdMap[iddoctor];
+        return doctor;
+    }
+
+    function getPatient(uint numPatient) view public returns(Patient memory) {
+        Patient storage patient = patientNumSecuMap[numPatient];
+        return patient;
     }
 
     function _setDoctorId(uint index) private {
