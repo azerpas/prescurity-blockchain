@@ -241,7 +241,7 @@ contract Prescurity {
         emit PharmaClaimed(prescription, msg.sender, patient);
     }
 
-    function showPrescriptionPatient(uint numSecuPatient) view public pharmacyOnly returns(Prescription[] memory){
+    function showPrescriptionPatient(uint numSecuPatient) view public returns(Prescription[] memory){
         //require(numSecuPatient.length == 15, "not a secu number");
 
         Patient storage patient = patientNumSecuMap[numSecuPatient];
