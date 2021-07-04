@@ -274,6 +274,12 @@ contract Prescurity {
         Doctor storage doctor= doctorIdMap[iddoctor];
         return doctor;
     }
+
+    function getPatient(uint numPatient) view public returns(Patient memory) {
+        Patient storage patient = patientNumSecuMap[numPatient];
+        return patient;
+    }
+
     function _setDoctorId(uint index) private {
         _doctorId = index;
     }
