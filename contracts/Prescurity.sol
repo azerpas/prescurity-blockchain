@@ -244,7 +244,7 @@ contract Prescurity {
     }
 
     function showPrescriptionPatient(uint numSecuPatient) view public returns(Prescription[] memory){
-        require(numSecuPatient < 100000000000000 || numSecuPatient > 999999999999999, "Numero de securite require 15 numbers");
+        require(numSecuPatient > 100000000000000 && numSecuPatient < 999999999999999, "Numero de securite require 15 numbers");
 
         Patient storage patient = patientNumSecuMap[numSecuPatient];
         uint len=5;
@@ -266,7 +266,7 @@ contract Prescurity {
      * @param amountOfPrescriptions the amount of prescriptions to get
      */
     function getLastDoctorPrescriptions(uint amountOfPrescriptions) view public doctorOnly returns(Prescription[] memory){
-        require(amountOfPrescriptions < 0 || amountOfPrescriptions > 25, "Please input an amount of prescriptions between 0 and 25");
+        require(amountOfPrescriptions > 0 && amountOfPrescriptions < 25, "Please input an amount of prescriptions between 0 and 25");
         uint doctorId = doctorAddressMap[msg.sender].id;
         Doctor storage doctor = doctorIdMap[doctorId];
 
