@@ -261,8 +261,12 @@ contract Prescurity {
         return prescriptions;
     }
 
+    /**
+     * Fetch the last "amountOfPrescriptions" a doctor has created.
+     * @param amountOfPrescriptions the amount of prescriptions to get
+     */
     function getLastDoctorPrescriptions(uint amountOfPrescriptions) view public doctorOnly returns(Prescription[] memory){
-        require(amountOfPrescriptions > 0 || amountOfPrescriptions > 25, "Please input an amount of prescriptions between 0 and 25");
+        require(amountOfPrescriptions < 0 || amountOfPrescriptions > 25, "Please input an amount of prescriptions between 0 and 25");
         uint doctorId = doctorAddressMap[msg.sender].id;
         Doctor storage doctor = doctorIdMap[doctorId];
 
