@@ -27,7 +27,7 @@ contract Prescurity {
         string speciality;
         string name;
         address payable doctorAddress;
-        uint[] prescriptionIds;
+        uint[] prescriptionsIds;
         bool isValue;
     }
 
@@ -203,11 +203,13 @@ contract Prescurity {
 
     function addPrescription(uint amountAskedByDoctor, uint numero_secu, string calldata medicine, string calldata disease, string calldata frequency) external doctorOnly {
         //require(msg.value == amountAskedByDoctor, append("Please match the asked value by the doctor: ",uint2str(amountAskedByDoctor)));
-        Doctor storage doctor = doctorAddressMap[msg.sender];
+        uint doctorId = doctorAddressMap[msg.sender].id;
+        // We first fetch the doctor id from the msg.sender then get the doctor object mapped by the ID. 
+        Doctor storage doctor = doctorIdMap[doctorId];
         Patient storage patient = patientNumSecuMap[numero_secu];
         uint prescriptionId = getPrescriptionId();
         patient.prescriptionsIds.push(prescriptionId);
-        doctor.prescriptionIds.push(prescriptionId);
+        doctor.prescriptionsIds.push(prescriptionId);
         prescriptionIdMap[prescriptionId].id = prescriptionId;
         prescriptionIdMap[prescriptionId].claimed = false;
         prescriptionIdMap[prescriptionId].paid = false;
@@ -242,19 +244,40 @@ contract Prescurity {
     }
 
     function showPrescriptionPatient(uint numSecuPatient) view public returns(Prescription[] memory){
-        //require(numSecuPatient.length == 15, "not a secu number");
+        require(numSecuPatient < 100000000000000 || numSecuPatient > 999999999999999, "Numero de securite require 15 numbers");
 
         Patient storage patient = patientNumSecuMap[numSecuPatient];
         uint len=5;
         
-        if(patient.prescriptionsIds.length < 5){
+        if(patient.prescriptionsIds.length < len){
             len = patient.prescriptionsIds.length;
         }
-        uint taille=patient.prescriptionsIds.length;
         Prescription[] memory prescriptions = new Prescription[](len);
         for(uint i=0; i < len; i++){
 
-            Prescription storage prescription = prescriptionIdMap[patient.prescriptionsIds[taille-1-i]];
+            Prescription storage prescription = prescriptionIdMap[patient.prescriptionsIds[len-1-i]];
+            prescriptions[i] = prescription;
+        }
+        return prescriptions;
+    }
+
+    /**
+     * Fetch the last "amountOfPrescriptions" a doctor has created.
+     * @param amountOfPrescriptions the amount of prescriptions to get
+     */
+    function getLastDoctorPrescriptions(uint amountOfPrescriptions) view public doctorOnly returns(Prescription[] memory){
+        require(amountOfPrescriptions < 0 || amountOfPrescriptions > 25, "Please input an amount of prescriptions between 0 and 25");
+        uint doctorId = doctorAddressMap[msg.sender].id;
+        Doctor storage doctor = doctorIdMap[doctorId];
+
+        uint len = amountOfPrescriptions;
+        if(doctor.prescriptionsIds.length < len){
+            len = doctor.prescriptionsIds.length;
+        }
+        Prescription[] memory prescriptions = new Prescription[](len);
+        for(uint i=0; i < len; i++){
+
+            Prescription storage prescription = prescriptionIdMap[doctor.prescriptionsIds[len-1-i]];
             prescriptions[i] = prescription;
         }
         return prescriptions;
