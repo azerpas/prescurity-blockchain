@@ -20,5 +20,15 @@
 - Then "Add Project"
 ![image](https://user-images.githubusercontent.com/19282069/124558297-bd47c980-de3a-11eb-90aa-201eb66e300c.png)
 - Select `truffle-config.js` inside the folder cloned
-- Set the "Account & Keys" balance to 300 and "Number of accounts" 20.
-- Save the workspace
+- Set the "Account & Keys" balance to 300 and "Number of accounts" 20
+- Save the workspace and note the RPC URL address
+### MetaMask
+- Create a wallet and **save your private key securely**
+- Click on the network dropdown
+![image](https://user-images.githubusercontent.com/19282069/124569046-e0c44180-de45-11eb-8810-9f22e789ddca.png)
+- Choose custom RPC
+- Enter the URL from Ganache and fill the other fields
+#### You can now import accounts from Ganache by importing their private key to MetaMask
+![image](https://user-images.githubusercontent.com/19282069/124569418-3862ad00-de46-11eb-8041-19f0ac4b4f55.png)
+![image](https://user-images.githubusercontent.com/19282069/124569653-6c3dd280-de46-11eb-81c8-4a35d59c5f82.png)
+![image](https://user-images.githubusercontent.com/19282069/124569667-6f38c300-de46-11eb-871d-9077255deddb.png)
