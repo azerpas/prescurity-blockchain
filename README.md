@@ -23,7 +23,7 @@
 - Save the workspace and note the RPC URL address
 ### MetaMask
 - Create a wallet and **save your private key securely**
-- Click on the network dropdown
+- Click on the network dropdown      
 ![image](https://user-images.githubusercontent.com/19282069/124569046-e0c44180-de45-11eb-8810-9f22e789ddca.png)
 - Choose custom RPC
 - Enter the URL from Ganache and fill the other fields
