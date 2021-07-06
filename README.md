@@ -13,7 +13,6 @@
 ## How to use
 
 - Install [requirements above](#stack)
-- `git pull https://github.com/azerpas/prescurity-blockchain.git`
 ### Ganache
 - Init Ganache by creating a "New Workspace"
 ![image](https://user-images.githubusercontent.com/19282069/124558244-ac975380-de3a-11eb-83f8-9e1d6b51eb10.png)
@@ -32,3 +31,11 @@
 ![image](https://user-images.githubusercontent.com/19282069/124569418-3862ad00-de46-11eb-8041-19f0ac4b4f55.png)
 ![image](https://user-images.githubusercontent.com/19282069/124569653-6c3dd280-de46-11eb-81c8-4a35d59c5f82.png)
 ![image](https://user-images.githubusercontent.com/19282069/124569667-6f38c300-de46-11eb-871d-9077255deddb.png)
+### Project setup
+- `git pull https://github.com/azerpas/prescurity-blockchain.git`
+- `cd prescurity-blockchain`
+- `cp .env.example .env.local`
+- Set the `OWNER_ADDRESS` to the Ganache address you want the Owner to have
+- Import this account to MetaMask
+- `npm run update`
+- [Setup the front-end project](https://github.com/azerpas/prescurity-dashboard#how-to-use) and use a compatible browser (Firefox, Brave, Chrome) to access http://localhost:3000/
