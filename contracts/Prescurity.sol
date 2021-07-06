@@ -2,17 +2,30 @@
 pragma solidity >=0.4.22 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-/// @title Prescription made by the doctor after a consultation
+/// @title Prescurity, a healt smart contract to create digital medical prescriptions
+/// @author Anthony @azerpas, Yann @Xihiems, Martin @MartinLenaerts
+/// @notice This contract helps the Doctor, Pharmacist and patient to interact
 contract Prescurity {
 
     /**
-     * @dev Owner should be the admin
+     * @notice _owner is the smart contract original deployer
      * He is responsible for adding Doctors and Pharmacists
      */
     address private _owner;
 
+    /**
+     * @notice doctor current id inside the blockchain, incremented at each addition
+     */
     uint private _doctorId;
+
+    /**
+     * @notice pharmacy current id inside the blockchain, incremented at each addition
+     */
     uint private _pharmacyId;
+
+    /**
+     * @notice prescription current id inside the blockchain, incremented at each addition
+     */
     uint private _prescriptionId;
 
     struct Patient {
@@ -52,7 +65,7 @@ contract Prescurity {
         bool paid;
     } 
 
-    // set owner as first interactor with the contract
+    /// @notice initialize the smart contract by setting the owner to the deployer
     constructor() public {
         _setOwner(msg.sender);
         _setDoctorId(1);
@@ -78,6 +91,9 @@ contract Prescurity {
     mapping (address => authentification) pharmacyAuthentification;
     mapping (uint => Prescription) prescriptionIdMap;
 
+    /**
+     * @notice Validator that check if the message sender is a patient
+     */
     modifier patientOnly() {
         if (patientAuthentification[msg.sender] == authentification.patient) {
             _;
@@ -86,6 +102,9 @@ contract Prescurity {
         }
     }
 
+    /**
+     * @notice Validator that check if the message sender is a doctor
+     */
     modifier doctorOnly() {
         if (doctorAuthentification[msg.sender] == authentification.doctor) {
             _;
@@ -94,6 +113,9 @@ contract Prescurity {
         }
     }
     
+    /**
+     * @notice Validator that check if the message sender is a pharmacy
+     */
     modifier pharmacyOnly(){
         if (pharmacyAuthentification[msg.sender] == authentification.pharmacy) {
             _;
@@ -102,6 +124,9 @@ contract Prescurity {
         }
     }
     
+    /**
+     * @notice Validator that check if the message sender is a owner
+     */
     modifier ownerOnly(){
         if (getOwner() == msg.sender) {
             _;
@@ -110,6 +135,11 @@ contract Prescurity {
         }
     }
 
+    /**
+     * @notice Convert a integer to a string
+     * @param _i the integer to convert
+     * @return _uintAsString the uint as a string
+     */
     function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
         if (_i == 0) {
             return "0";
@@ -132,22 +162,44 @@ contract Prescurity {
         return string(bstr);
     }
 
+    /**
+     * @notice Concatenate two strings
+     * @param a first string
+     * @param b second string
+     * @return the concatenated string
+     */
     function append(string memory a, string memory b) internal pure returns (string memory) {
         return string(abi.encodePacked(a, b));
     }
 
+    /**
+     * @notice Get the owner of the smart contract
+     * @return owner address
+     */
     function getOwner() public view returns (address) {
         return _owner;
     }
 
+    /**
+     * @notice Get the current doctor id
+     * @return id as uint
+     */
     function getDoctorId() internal returns (uint) {
         return _doctorId++;
     }
 
+    /**
+     * @notice Get the current prescription id
+     * @return id as uint
+     */
     function getPrescriptionId() internal returns (uint) {
         return _prescriptionId++;
     }
 
+    /**
+     * @notice Get the user type of the message sender
+     * @return user_type as a string: doctor | pharmacy | patient | owner | none
+     */
     function getUserType() view public returns (string memory) {
         if (doctorAuthentification[msg.sender] == authentification.doctor) {
             return "doctor";
@@ -164,6 +216,12 @@ contract Prescurity {
         return "none";
     }
 
+    /**
+     * @notice Attribute the status "doctor" to an ethereum (EC20) address
+     * @param addr the user ethereum address
+     * @param name the user name
+     * @param speciality the doctor speciality
+     */
     function addDoctor(address payable addr, string calldata name, string calldata speciality) external ownerOnly {
         require(doctorAuthentification[addr] != authentification.doctor, "This address is already defined as a doctor");
         require(pharmacyAuthentification[addr] != authentification.pharmacy, "This address is already defined as a doctor");
@@ -177,6 +235,11 @@ contract Prescurity {
         doctorAuthentification[addr] = authentification.doctor;
     }
 
+    /**
+     * @notice Attribute the status "pharmacy" to an ethereum (EC20) address
+     * @param addr the user ethereum address
+     * @param name the user name
+     */
     function addPharmacy(address addr, string calldata name) external ownerOnly {
         require(pharmacyAuthentification[addr] != authentification.pharmacy, "This address is already defined as a doctor");
         require(doctorAuthentification[addr] != authentification.doctor, "This address is already defined as a doctor");
@@ -190,6 +253,9 @@ contract Prescurity {
     }
 
     /**
+     * @notice Attribute the status "pharmacy" to an ethereum (EC20) address
+     * @param numero_secu the patient "numéro de sécurité sociale"
+     * @param addr the user ethereum address
      * @dev problème: une personne mal-intentionée pourrait lier un numéro de sécu ne lui appartenant pas à une addresse quelconque 
      */
     function addPatient(uint numero_secu, address addr) external {
@@ -201,6 +267,15 @@ contract Prescurity {
         patientAuthentification[addr] = authentification.patient;
     }
 
+    /**
+     * @notice Add a prescription in the smart contract
+     * @param amountAskedByDoctor price set by the doctor for the consultation and eventually the medecine
+     * @param numero_secu the patient "numéro de sécurité sociale"
+     * @param medicine the medicine prescribed
+     * @param disease the disease
+     * @param frequency the frequency for the medicine
+     * @dev problème: une personne mal-intentionée pourrait lier un numéro de sécu ne lui appartenant pas à une addresse quelconque 
+     */
     function addPrescription(uint amountAskedByDoctor, uint numero_secu, string calldata medicine, string calldata disease, string calldata frequency) external doctorOnly {
         //require(msg.value == amountAskedByDoctor, append("Please match the asked value by the doctor: ",uint2str(amountAskedByDoctor)));
         uint doctorId = doctorAddressMap[msg.sender].id;
@@ -224,6 +299,10 @@ contract Prescurity {
         emit Consultation(prescriptionIdMap[prescriptionId], patient, doctor, amountAskedByDoctor);
     }
 
+    /**
+     * @notice Pay the prescription as a patient
+     * @param prescriptionId the prescription id
+     */
     function payPrescription(uint prescriptionId) payable external patientOnly {
         require(address(this).balance >= msg.value, "Balance is not enough");
         require(!prescriptionIdMap[prescriptionId].paid, "Prescription should not be paid");
@@ -235,6 +314,10 @@ contract Prescurity {
         prescriptionIdMap[prescriptionId].paid = true;
     }
 
+    /**
+     * @notice Claim the prescription as a Pharmacy before delivering the medicine
+     * @param prescriptionId the prescription id
+     */
     function claimPrescription(uint prescriptionId) external pharmacyOnly {
         require(prescriptionIdMap[prescriptionId].claimed == false, "This presciption is already claimed");
         Prescription storage prescription = prescriptionIdMap[prescriptionId];
@@ -243,6 +326,12 @@ contract Prescurity {
         emit PharmaClaimed(prescription, msg.sender, patient);
     }
 
+    /**
+     * @notice Get the latest prescriptions of a patient
+     * @param numSecuPatient the patient "numéro de sécurité sociale"
+     * @return A list of Prescription objects
+     * @dev We need to restrict this function to specific actors
+     */
     function showPrescriptionPatient(uint numSecuPatient) view public returns(Prescription[] memory){
         require(numSecuPatient > 100000000000000 && numSecuPatient < 999999999999999, "Numero de securite require 15 numbers");
 
@@ -262,8 +351,9 @@ contract Prescurity {
     }
 
     /**
-     * Fetch the last "amountOfPrescriptions" a doctor has created.
+     * @notice Fetch the last "amountOfPrescriptions" a doctor has created.
      * @param amountOfPrescriptions the amount of prescriptions to get
+     * @return A list of Prescription objects
      */
     function getLastDoctorPrescriptions(uint amountOfPrescriptions) view public doctorOnly returns(Prescription[] memory){
         require(amountOfPrescriptions > 0 && amountOfPrescriptions < 25, "Please input an amount of prescriptions between 0 and 25");
@@ -283,43 +373,80 @@ contract Prescurity {
         return prescriptions;
     }
 
+    /**
+     * @notice Get a specific Prescription object
+     * @param idprescription the prescription id
+     * @return A Prescription object
+     */
     function getPrescription(uint idprescription) view public doctorOnly returns(Prescription memory) {
         return prescriptionIdMap[idprescription];
     }
 
+    /**
+     * @notice Set a new owner
+     * @param new_owner the new owner address
+     */
     function _setOwner(address new_owner) private {
         address old_owner = _owner;
         _owner = new_owner;
         emit DefineOwnership(old_owner, new_owner);
     }
 
+    /**
+     * @notice Get a doctor
+     * @param iddoctor the doctor id
+     * @return Doctor object
+     */
     function getDoctor(uint iddoctor) view public returns(Doctor memory) {
         Doctor storage doctor= doctorIdMap[iddoctor];
         return doctor;
     }
 
+    /**
+     * @notice Get a patient
+     * @param numPatient the patient "numéro de sécurité sociale"
+     * @return Doctor object
+     */
     function getPatient(uint numPatient) view public returns(Patient memory) {
         Patient storage patient = patientNumSecuMap[numPatient];
         return patient;
     }
 
+    /**
+     * @dev deprecated
+     */
     function getPatientAddress(address patientaddress) view public returns(Patient memory) {
         Patient storage patient = patientAddressMap[patientaddress];
         return patient;
     }
 
+    /**
+     * @notice Set a new doctor id
+     * @param index the index
+     */
     function _setDoctorId(uint index) private {
         _doctorId = index;
     }
 
+    /**
+     * @notice Set a new pharmacy id
+     * @param index the index
+     */
     function _setPharmacyId(uint index) private {
         _pharmacyId = index;
     }
 
+    /**
+     * @notice Set a new prescription id
+     * @param index the index
+     */
     function _setPrescriptionId(uint index) private {
         _prescriptionId = index;
     }
     
+    /**
+     * @notice Events are triggered to return values in the front-end and logging purposes
+     */
     event prescriptionsShow(Prescription[] prescription);
     event PharmaClaimed(Prescription prescription,address indexed pharmaaddress,Patient patient);
     event DefineOwnership(address indexed old_owner, address indexed new_owner);
