@@ -38,4 +38,5 @@
 - Set the `OWNER_ADDRESS` to the Ganache address you want the Owner to have
 - Import this account to MetaMask
 - `npm run update`
+- Copy the `build/contracts/*` contracts to the front-end repository `src/contracts/`
 - [Setup the front-end project](https://github.com/azerpas/prescurity-dashboard#how-to-use) and use a compatible browser (Firefox, Brave, Chrome) to access http://localhost:3000/
