@@ -1,5 +1,7 @@
 # prescurity-blockchain
 
+Prescurity blockchain. Dashboard can be found [here](https://github.com/azerpas/prescurity-dashboard).
+
 ## Stack
 ### Code
 - [Solidity](http://solidity.readthedocs.io)
